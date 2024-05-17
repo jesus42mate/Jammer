@@ -1,4 +1,4 @@
-### Hammer
+### Jammer
 
 Hammer is a tool made to quickly install software that I regularle use and need to be efficient
 and my personal working tools in the terminal
