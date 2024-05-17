@@ -1,7 +1,10 @@
 ### Jammer
 
-Hammer is a tool made to quickly install software that I regularle use and need to be efficient
+Jammer is a tool made to quickly install software that I regularly use and need to be efficient
 and my personal working tools in the terminal
+
+Currently it is though for Ubuntu 22.04 but will eventually allow for more versions like the
+24.04
 
 Some of these are...
   - Updating (and upgrading) the apt packet manager
@@ -11,6 +14,3 @@ Some of these are...
   - Etc...
 
 To use, just execute the program by running `make run` and follow the instructions
-
-
-
