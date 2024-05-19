@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"errors"
-	"fmt"
-	"os/exec"
+  "bufio"
+  "errors"
+  "fmt"
+  "os/exec"
 
-	"github.com/eiannone/keyboard"
+  "github.com/eiannone/keyboard"
 )
 
 func ChooseFrom(options []string) (map[int]bool, error) {
@@ -37,10 +37,10 @@ func ChooseFrom(options []string) (map[int]bool, error) {
     if err != nil {
       fmt.Println("ERROR: ", err)
     }
-    if char == 'k' && position >= 0 {
+    if char == 'k' && position > 0 {
       position = position - 1
     }
-    if char == 'j' && position <= len(options) {
+    if char == 'j' && position < len(options) - 1 {
       position = position + 1
     }
     if char == 'a' {
@@ -81,8 +81,12 @@ func ChooseFrom(options []string) (map[int]bool, error) {
   return m, nil
 }
 
-func ShellExec(cmd string, args ...string) {
-  out, err := exec.Command(cmd, args...).Output()
+// Executes a shell command
+// 
+// @param name is the command to be executed; But it
+// might also be 'sudo', while the actual command is inside args. 
+func ShellExec(name string, args ...string) {
+  out, err := exec.Command(name, args...).Output()
   if err != nil {
     fmt.Println("ERROR:", err)
   }
@@ -90,12 +94,28 @@ func ShellExec(cmd string, args ...string) {
   fmt.Println("output: ", output)
 }
 
-func ReadWord(reader *bufio.Reader) string {
-  inp, err := reader.ReadString(' ')
-  if err != nil {
-    fmt.Println("ERROR: err")
+func ReadYesOrNo(scn *bufio.Scanner) bool {
+  var exit bool = false
+  for (exit == false) {
+    fmt.Printf("(yes/no):")
+    inp := ReadWord(scn)
+    if inp == "yes" || inp == "y" {
+      return true
+    } 
+    if inp == "no" || inp == "n" {
+      return false
+    } 
   }
-  
+  return true
+}
+
+func ReadWord(scn *bufio.Scanner) string {
+  scn.Scan()
+  var inp string = string(scn.Bytes()[:])
   return inp
+}
+
+func PrintInput(info []byte) {
+  fmt.Printf(string(info[:]))
 }
 
