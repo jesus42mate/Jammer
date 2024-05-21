@@ -5,29 +5,101 @@ import (
   "errors"
   "fmt"
   "os/exec"
-
   "github.com/eiannone/keyboard"
+  "golang.org/x/term"
 )
 
-func ChooseFrom(options []string) (map[int]bool, error) {
-  ShellExec("clear")
+func TermChoice(choices []string, isBinary bool, term *term.Terminal) (chosen map[int]bool, err error) {
+  position := 0
+  m := map[int]bool{}
+  exit := false
 
+  ClearScreen()
+  ResetCaret()
+  term.Write([]byte("\nInstructions:\n\n"))
+  term.Write([]byte("'j' and 'k' to move between choices\n\n"))
+  term.Write([]byte("'a' to mark a choice\n\n"))
+  term.Write([]byte("'q' to exit\n\n"))
+  term.Write([]byte("Enter to continue\n"))
+
+  for i := 0; i < len(choices); i++ {
+    m[position] = false
+    if position == i {
+      term.Write([]byte("\n -> [] " + choices[i]))
+    } else {
+      term.Write([]byte("\n    [] " + choices[i]))
+    }
+  }
+
+  for (exit != true) {
+    char, key, err := keyboard.GetSingleKey()
+    ClearScreen()
+    ResetCaret()
+    if err != nil {
+      fmt.Println("ERROR: ", err)
+    }
+    if char == 'k' && position > 0 {
+      position = position - 1
+    }
+    if char == 'j' && position < len(choices) - 1 {
+      position = position + 1
+    }
+    if char == 'a' {
+      if m[position] == true {
+	m[position] = false
+      } else {
+	m[position] = true
+      }
+    }
+    if char == 'q' {
+      return m, errors.New("Canceled the operation, exiting.")
+    }
+    if key == keyboard.KeyEnter {
+      exit = true
+    }
+    term.Write([]byte("\nInstructions:\n\n"))
+    term.Write([]byte("'j' and 'k' to move between choices\n\n"))
+    term.Write([]byte("'a' to mark a choice\n\n"))
+    term.Write([]byte("'q' to exit\n\n"))
+    term.Write([]byte("Enter to continue\n"))
+    for i := 0; i < len(choices); i++ {
+      if position == i {
+	if m[position] == true {
+	  term.Write([]byte("\n -> [x] " + choices[i]))
+	} else {
+	  term.Write([]byte("\n -> [] " + choices[i]))
+	}
+      } else {
+	if m[i] == true {
+	  term.Write([]byte("\n    [x] " + choices[i]))
+	} else {
+	  term.Write([]byte("\n    [] " + choices[i]))
+	}
+      }
+    }
+  }
+
+  return m, nil
+
+}
+
+func ChooseFrom(choices []string, isBinary bool) (map[int]bool, error) {
   position := 0
   m := map[int]bool{}
   exit := false
 
   fmt.Print("Instructions:\n\n")
-  fmt.Print("'j' and 'k' to move between options\n\n")
-  fmt.Print("'a' to mark an option\n\n")
-  fmt.Print("Q to exit\n\n")
+  fmt.Print("'j' and 'k' to move between choices\n\n")
+  fmt.Print("'a' to mark a choice\n\n")
+  fmt.Print("'q' to exit\n\n")
   fmt.Print("Enter to continue\n\n")
 
-  for i := 0; i < len(options); i++ {
+  for i := 0; i < len(choices); i++ {
     m[position] = false
     if position == i {
-      fmt.Println(" -> []  " + options[i])
+      fmt.Println(" -> []  " + choices[i])
     } else {
-      fmt.Println("    []  " + options[i])
+      fmt.Println("    []  " + choices[i])
     }
   }
 
@@ -40,7 +112,7 @@ func ChooseFrom(options []string) (map[int]bool, error) {
     if char == 'k' && position > 0 {
       position = position - 1
     }
-    if char == 'j' && position < len(options) - 1 {
+    if char == 'j' && position < len(choices) - 1 {
       position = position + 1
     }
     if char == 'a' {
@@ -57,22 +129,22 @@ func ChooseFrom(options []string) (map[int]bool, error) {
       exit = true
     }
     fmt.Print("Instructions:\n\n")
-    fmt.Print("'j' and 'k' to move between options\n\n")
-    fmt.Print("'a' to mark an option\n\n")
+    fmt.Print("'j' and 'k' to move between choices\n\n")
+    fmt.Print("'a' to mark a choice\n\n")
     fmt.Print("Q to exit\n\n")
     fmt.Print("Enter to continue\n\n")
-    for i := 0; i < len(options); i++ {
+    for i := 0; i < len(choices); i++ {
       if position == i {
 	if m[position] == true {
-	  fmt.Println(" -> [x] " + options[i])
+	  fmt.Println(" -> [x] " + choices[i])
 	} else {
-	  fmt.Println(" -> []  " + options[i])
+	  fmt.Println(" -> []  " + choices[i])
 	}
       } else {
 	if m[i] == true {
-	  fmt.Println("    [x] " + options[i])
+	  fmt.Println("    [x] " + choices[i])
 	} else {
-	  fmt.Println("    []  " + options[i])
+	  fmt.Println("    []  " + choices[i])
 	}
       }
     }
@@ -97,7 +169,7 @@ func ShellExec(name string, args ...string) {
 func ReadYesOrNo(scn *bufio.Scanner) bool {
   var exit bool = false
   for (exit == false) {
-    fmt.Printf("(yes/no):")
+    fmt.Printf("[yes/no]:")
     inp := ReadWord(scn)
     if inp == "yes" || inp == "y" {
       return true
@@ -118,4 +190,5 @@ func ReadWord(scn *bufio.Scanner) string {
 func PrintInput(info []byte) {
   fmt.Printf(string(info[:]))
 }
+
 

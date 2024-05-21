@@ -1,9 +1,9 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os/exec"
+  "bufio"
+  "fmt"
+  "os/exec"
 )
 
 func AptUpdate() {
@@ -29,15 +29,18 @@ func AptUpgrade() {
 }
 
 func InstallNeovim(scn *bufio.Scanner) {
+
   fmt.Println("\nInstalling 'Neovim'...")
+
   output_in_bytes, err := exec.Command("cd ~/").Output()
   if err != nil {
     fmt.Printf("ERROR: %s", err)
   }
   fmt.Println("\nWould you like to install xclip? (Recommended)")
-  fmt.Println("yes/no")
-  choice := ReadYesOrNo(scn)
-  if choice {
+
+  ChooseFrom([]string{"yes/no"}, false)
+
+  if ReadYesOrNo(scn) {
     ShellExec("sudo", "apt", "install", "xclip")
   }
 

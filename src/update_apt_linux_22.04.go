@@ -1,43 +1,53 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
+  //"bufio"
+  "fmt"
+  "os"
+  "golang.org/x/term"
 )
 
 func main() {
-  var scn *bufio.Scanner = bufio.NewScanner(os.Stdin)
-  fmt.Println("Welcome, what would you like to do?")
+  var stdin *os.File = os.Stdin
+  //var scanner *bufio.Scanner = bufio.NewScanner(stdin)
+  var terminal *term.Terminal = term.NewTerminal(stdin, "λ ")
+  var FD int = int(stdin.Fd())
 
-  choices, exit := ChooseFrom([]string{
+  terminal.Write([]byte("\nJammer: Helloo world! Im alive!\n"))
+
+  fmt.Println("\nWelcome to Jammer, what would you like to do?")
+
+  prevState, error := term.MakeRaw(FD)
+  formalPanicNeeds := FormalPanicNeeds{ FD, prevState }
+  if error != nil {
+    FormalPanic(formalPanicNeeds, error)
+  } else {
+    terminal.Write([]byte("\nJammer: Terminal RAW MODE ACTIVATED (in a robot voice)\n"))
+  }
+
+  choices, exit := TermChoice([]string{
     "1) Update and Upgrade apt packet manager.",
     "2) Install Neovim from source(LTS).",
     "3) Install NVM (Node Version Manager).",
-  })
+  }, false, terminal)
   if exit != nil {
-    fmt.Println(exit)
-    return
+    FormalPanic(formalPanicNeeds, exit)
   }
-
-  if ReadYesOrNo(scn) {
-    fmt.Println("true!")
-  } else {
-    fmt.Println("false!")
-  }
-
 
   if choices[0] {
-    //AptUpdate()
-    //AptUpgrade()
+    AptUpdate()
+    AptUpgrade()
   }
 
-  if (choices[1]) {
-    //InstallNeovim()
-  }
+  //if (choices[1]) {
+  //  //InstallNeovim()
+  //}
 
-  fmt.Println("\n-----------------")
-  fmt.Println("\nGraceful shutdown.")
-  fmt.Println("Thanks for using Jammer!")
+  defer term.Restore(FD, prevState)
+  terminal.Write([]byte("\nGraceful shutdown.\n"))
+  terminal.Write([]byte("Thanks for using Jammer!\n"))
+  terminal.Write([]byte("----------------------\n"))
 
 }
+
+
