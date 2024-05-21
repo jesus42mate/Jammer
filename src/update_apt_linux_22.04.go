@@ -1,7 +1,7 @@
 package main
 
 import (
-  //"bufio"
+  "bufio"
   "fmt"
   "os"
   "golang.org/x/term"
@@ -9,7 +9,7 @@ import (
 
 func main() {
   var stdin *os.File = os.Stdin
-  //var scanner *bufio.Scanner = bufio.NewScanner(stdin)
+  var scanner *bufio.Scanner = bufio.NewScanner(stdin)
   var terminal *term.Terminal = term.NewTerminal(stdin, "λ ")
   var FD int = int(stdin.Fd())
 
@@ -26,28 +26,27 @@ func main() {
   }
 
   choices, exit := TermChoice([]string{
-    "1) Update and Upgrade apt packet manager.",
-    "2) Install Neovim from source(LTS).",
-    "3) Install NVM (Node Version Manager).",
+    "Update and Upgrade apt packet manager.",
+    "Install Neovim from source(LTS).",
+    "Install NVM (Node Version Manager).",
   }, false, terminal)
+
   if exit != nil {
     FormalPanic(formalPanicNeeds, exit)
   }
 
   if choices[0] {
-    AptUpdate()
-    AptUpgrade()
+    AptUpdate(terminal)
+    AptUpgrade(terminal)
   }
-
-  //if (choices[1]) {
-  //  //InstallNeovim()
-  //}
+  if (choices[1]) {
+    InstallNeovim(scanner, terminal)
+  }
 
   defer term.Restore(FD, prevState)
   terminal.Write([]byte("\nGraceful shutdown.\n"))
   terminal.Write([]byte("Thanks for using Jammer!\n"))
   terminal.Write([]byte("----------------------\n"))
-
 }
 
 

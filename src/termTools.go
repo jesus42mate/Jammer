@@ -5,6 +5,7 @@ import (
   "golang.org/x/term"
 )
 
+
 type FormalPanicNeeds struct {
   FD int;
   prevState *term.State;
@@ -21,4 +22,12 @@ func ClearScreen() {
 
 func ResetCaret() {
   fmt.Print("\033[H")
+}
+
+func WriteTerm(term *term.Terminal, msg string) {
+  term.Write([]byte(msg+"\n"))
+}
+
+func WriteTermError(term *term.Terminal, err error) {
+  term.Write([]byte(fmt.Sprintf("error: %v\n", err)))
 }

@@ -1,50 +1,37 @@
 package main
 
 import (
-  "bufio"
-  "fmt"
-  "os/exec"
+	"bufio"
+	"fmt"
+	"os/exec"
+
+	"golang.org/x/term"
 )
 
-func AptUpdate() {
-  fmt.Println("\nUpdating 'apt'...")
-  output_in_bytes, err := exec.Command("sudo", "apt", "update").Output()
+func AptUpdate(term *term.Terminal) {
+  WriteTerm(term, "Updating 'apt'...")
+  out, err := exec.Command("sudo", "apt", "update").Output()
   if err != nil {
-    fmt.Printf("ERROR: %s", err)
+    WriteTermError(term, err)
   }
-  
-  output := string(output_in_bytes[:])
-  fmt.Printf("%s", output)
+  WriteTerm(term, string(out[:]))
 }
 
-func AptUpgrade() {
-  fmt.Println("\nUpgrading 'apt'...")
+func AptUpgrade(term *term.Terminal) {
+  WriteTerm(term, "Updating 'apt'...")
   out, err := exec.Command("sudo", "apt", "upgrade", "-y").Output()
   if err != nil {
-    fmt.Println("ERROR: ", err)
+    WriteTermError(term, err)
   }
   fmt.Println("Upgrade successfull!")
-  output := string(out[:])
-  fmt.Printf("%s", output) 
+  WriteTerm(term, string(out[:]))
 }
 
-func InstallNeovim(scn *bufio.Scanner) {
-
-  fmt.Println("\nInstalling 'Neovim'...")
-
-  output_in_bytes, err := exec.Command("cd ~/").Output()
-  if err != nil {
-    fmt.Printf("ERROR: %s", err)
+func InstallNeovim(scn *bufio.Scanner, term *term.Terminal) {
+  WriteTerm(term, "Installing 'Neovim'...\n")
+  ShellExec(term, "cd", "~/")
+  WriteTerm(term, "Would you like to install xclip? (Recommended)")
+  if ReadYesOrNo(scn, term) {
+    ShellExec(term, "sudo", "apt", "install", "xclip")
   }
-  fmt.Println("\nWould you like to install xclip? (Recommended)")
-
-  ChooseFrom([]string{"yes/no"}, false)
-
-  if ReadYesOrNo(scn) {
-    ShellExec("sudo", "apt", "install", "xclip")
-  }
-
-  output := string(output_in_bytes[:])
-  fmt.Printf("%s", output)
-
 }
