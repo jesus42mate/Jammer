@@ -8,8 +8,8 @@ also find this tool useful, if that is the case, feel free to use it.
 
 `But remember... this tool makes changes in the system as sudo and is still experimental, try at your own risk.`
 
-Currently it is though for Ubuntu 22.04 but will eventually allow for more versions like the
-24.04
+Currently it is though for Ubuntu 22.04 but will eventually allow for more versions like
+24.04.
 
 Some of these are...
   - Updating (and upgrading) the apt packet manager
