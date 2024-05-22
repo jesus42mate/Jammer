@@ -4,13 +4,97 @@ import (
   "bufio"
   "errors"
   "fmt"
+  "os"
   "os/exec"
+
   "github.com/eiannone/keyboard"
   "golang.org/x/term"
 )
 
+// Binary choice will return true for "yes" and false for "no",
+func BinaryChoice(term *term.Terminal, question string) bool {
+  ResetCaret()
+  ClearScreen()
+  position := false
+  sure := false
+  exit := false
+  WriteInstructions(term)
+  WriteTerm(term, question)
+  if position && !sure {
+    WriteTerm(term, " -> yes")
+    WriteTerm(term, "    no")
+  }
+  if !position && !sure {
+    WriteTerm(term, "    yes")
+    WriteTerm(term, " -> no")
+  }
+  if position && sure {
+    WriteTerm(term, " -> yes   sure?")
+    WriteTerm(term, "    no")
+  } 
+  if !position && sure {
+    WriteTerm(term, "    yes")
+    WriteTerm(term, " -> no   sure?")
+  }
+  for (!exit) {
+    char, _, err := keyboard.GetSingleKey()
+    if err != nil {
+      fmt.Println("ERROR: ", err)
+    }
+    ClearScreen()
+    ResetCaret()
+    WriteInstructions(term)
+    if char == 'k' && !position {
+      position = true
+      sure = false
+    }
+    if char == 'j' && position {
+      position = false
+      sure = false
+    }
+    if char == 'a' {
+      if sure {
+	return position
+      } else {
+	sure = true
+      }
+    }
+    WriteTerm(term, question)
+    if position && !sure {
+      WriteTerm(term, " -> yes")
+      WriteTerm(term, "    no")
+    }
+    if !position && !sure {
+      WriteTerm(term, "    yes")
+      WriteTerm(term, " -> no")
+    }
+    if position && sure {
+      WriteTerm(term, " -> yes   sure?")
+      WriteTerm(term, "    no")
+    } 
+    if !position && sure {
+      WriteTerm(term, "    yes")
+      WriteTerm(term, " -> no   sure?")
+    }
+  }
+  return false
+}
+
+
+
+
+//if err != nil {
+//  WriteTermError(term, err)
+//}
+//if choices[0] { // if true
+//  return true
+//} else {
+//  return false
+//}
+
+
 // TermChoice is meant to present a set of choices into a raw-moded terminal
-// 
+//
 // @param choices is a list of strings that the user can choose from
 //
 // @param isBinary is a boolean that determines if the user can choose multiple choices
@@ -21,26 +105,22 @@ import (
 // and the boolean is true if the choice is selected, and false otherwise
 //
 // @return err is an error that is returned if the user exits the function
-func TermChoice(choices []string, isBinary bool, term *term.Terminal) (chosen map[int]bool, err error) {
+func TermChoice(choices []string, term *term.Terminal, legend string) (chosen map[int]bool, err error) {
   position := 0
   m := map[int]bool{}
   exit := false
 
   ClearScreen()
   ResetCaret()
-  WriteTerm(term, "\nInstructions:\n")
-  WriteTerm(term, "'j' and 'k' to move between choices\n")
-  WriteTerm(term, "'a' to mark a choice\n")
-  WriteTerm(term, "'q' to exit\n")
-  WriteTerm(term, "Enter to continue")
+  WriteInstructions(term)
 
   for i := 0; i < len(choices); i++ {
     m[position] = false
     if position == i {
-      opt := fmt.Sprintf("\n -> [] %d) %s", i, choices[i])
+      opt := fmt.Sprintf("\n -> []  %s", choices[i])
       term.Write([]byte(opt))
     } else {
-      opt := fmt.Sprintf("\n    [] %d) %s", i, choices[i])
+      opt := fmt.Sprintf("\n    [] %s", choices[i])
       term.Write([]byte(opt))
     }
   }
@@ -71,26 +151,22 @@ func TermChoice(choices []string, isBinary bool, term *term.Terminal) (chosen ma
     if key == keyboard.KeyEnter {
       exit = true
     }
-    WriteTerm(term, "\nInstructions:\n")
-    WriteTerm(term, "'j' and 'k' to move between choices\n")
-    WriteTerm(term, "'a' to mark a choice\n")
-    WriteTerm(term, "'q' to exit\n")
-    WriteTerm(term, "Enter to continue")
+    WriteInstructions(term)
     for i := 0; i < len(choices); i++ {
       if position == i {
 	if m[position] == true {
-	  opt := fmt.Sprintf("\n -> [x] %d) %s", i, choices[i])
+	  opt := fmt.Sprintf("\n -> [x]  %s", choices[i])
 	  term.Write([]byte(opt))
 	} else {
-	  opt := fmt.Sprintf("\n -> [] %d) %s", i, choices[i])
+	  opt := fmt.Sprintf("\n -> []  %s", choices[i])
 	  term.Write([]byte(opt))
 	}
       } else {
 	if m[i] == true {
-	  opt := fmt.Sprintf("\n    [x] %d) %s", i, choices[i])
+	  opt := fmt.Sprintf("\n    [x]  %s", choices[i])
 	  term.Write([]byte(opt))
 	} else {
-	  opt := fmt.Sprintf("\n    [] %d) %s", i, choices[i])
+	  opt := fmt.Sprintf("\n    [] %s", choices[i])
 	  term.Write([]byte(opt))
 	}
       }
@@ -139,6 +215,21 @@ func ReadWord(scn *bufio.Scanner) string {
 
 func PrintByteInput(info []byte) {
   fmt.Printf(string(info[:]))
+}
+
+func ChangeDir(where string) {
+  err := os.Chdir(where)
+  if err != nil {
+    fmt.Printf("%s", err)
+  }
+}
+
+func WriteInstructions(term *term.Terminal) {
+  WriteTerm(term, "\nInstructions:\n")
+  WriteTerm(term, "'j' and 'k' to move between options\n")
+  WriteTerm(term, "'a' to mark an option\n")
+  WriteTerm(term, "'q' to exit\n")
+  WriteTerm(term, "Enter to continue")
 }
 
 

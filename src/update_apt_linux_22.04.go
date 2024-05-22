@@ -13,6 +13,23 @@ func main() {
   var terminal *term.Terminal = term.NewTerminal(stdin, "λ ")
   var FD int = int(stdin.Fd())
 
+  userHomeDir, err := os.UserHomeDir()
+
+  if err != nil {
+    fmt.Printf("%s", err)
+  } else {
+    fmt.Println("User's home dir is:", userHomeDir)
+  }
+
+  err = os.Chdir("/home")
+  if err != nil {
+    fmt.Printf("%s", err)
+  } else {
+    ShellExec(terminal, "pwd")
+    ChangeDir(userHomeDir)
+    ShellExec(terminal, "mkdir", "Jammer")
+  }
+
   terminal.Write([]byte("\nJammer: Helloo world! Im alive!\n"))
 
   fmt.Println("\nWelcome to Jammer, what would you like to do?")
@@ -29,7 +46,7 @@ func main() {
     "Update and Upgrade apt packet manager.",
     "Install Neovim from source(LTS).",
     "Install NVM (Node Version Manager).",
-  }, false, terminal)
+  }, terminal, "")
 
   if exit != nil {
     FormalPanic(formalPanicNeeds, exit)
@@ -40,7 +57,7 @@ func main() {
     AptUpgrade(terminal)
   }
   if (choices[1]) {
-    InstallNeovim(scanner, terminal)
+    InstallNeovim(scanner, terminal, userHomeDir)
   }
 
   defer term.Restore(FD, prevState)
