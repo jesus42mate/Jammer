@@ -85,13 +85,13 @@ func InstallNeovim(
 
   _, err = os.Open("nvim")
   if err != nil {
-    return err
+    WriteTerm(term, "# nvim folder not found. Great!")
+    ShellExec(term, "mv neovim-config nvim")
+    WriteTerm(term, "# Finished setting up neovim, try it with: $ nvim 'example.txt'")
   } else {
     WriteTerm(term, "# Found a nvim folder, renaming to nvim-old to swap configs")
     ShellExec(term, "mv nvim nvim-old") 
   }
-  ShellExec(term, "mv neovim-config nvim")
-  WriteTerm(term, "# Finished setting up neovim, try it with: $ nvim 'example.txt'")
   return nil
 }
 
