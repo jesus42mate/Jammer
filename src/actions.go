@@ -52,6 +52,7 @@ func InstallNeovim(
     ShellExec(term, "make CMAKE_BUILD_TYPE=RelWithDebInfo" )
     ShellExec(term, "git checkout stable")
     ShellExec(term, "cd build && cpack -G DEB && sudo dpkg -i nvim-linux64.deb")
+    ShellExec(term, "sudo make install")
     ShellExec(term, "sudo apt-get install ripgrep")
   }
 
