@@ -31,3 +31,8 @@ func WriteTerm(term *term.Terminal, msg string) {
 func WriteTermError(term *term.Terminal, err error) {
   term.Write([]byte(fmt.Sprintf("error: %v\n", err)))
 }
+
+func WriteTermPanic(term *term.Terminal, err error) {
+  term.Write([]byte(fmt.Sprintf("error: %v\n", err)))
+  panic(err)
+}

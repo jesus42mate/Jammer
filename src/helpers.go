@@ -1,25 +1,27 @@
 package main
 
 import (
-  "bufio"
-  "errors"
-  "fmt"
-  "os"
-  "os/exec"
+	"bufio"
+	"errors"
+	"fmt"
+	"io/fs"
+	"os"
+	"os/exec"
+	"strings"
 
-  "github.com/eiannone/keyboard"
-  "golang.org/x/term"
+	"github.com/eiannone/keyboard"
+	"golang.org/x/term"
 )
 
 // Binary choice will return true for "yes" and false for "no",
 func BinaryChoice(term *term.Terminal, question string) bool {
   ResetCaret()
   ClearScreen()
-  position := false
+  position := true
   sure := false
   exit := false
   WriteInstructions(term)
-  WriteTerm(term, question)
+  WriteTerm(term, "\n" + question)
   if position && !sure {
     WriteTerm(term, " -> yes")
     WriteTerm(term, "    no")
@@ -44,6 +46,7 @@ func BinaryChoice(term *term.Terminal, question string) bool {
     ClearScreen()
     ResetCaret()
     WriteInstructions(term)
+    WriteTerm(term, "\n" + question)
     if char == 'k' && !position {
       position = true
       sure = false
@@ -59,7 +62,6 @@ func BinaryChoice(term *term.Terminal, question string) bool {
 	sure = true
       }
     }
-    WriteTerm(term, question)
     if position && !sure {
       WriteTerm(term, " -> yes")
       WriteTerm(term, "    no")
@@ -180,8 +182,10 @@ func TermChoice(choices []string, term *term.Terminal, legend string) (chosen ma
 // 
 // @param name is the command to be executed; But it
 // might also be 'sudo', while the actual command is inside args. 
-func ShellExec(term *term.Terminal, name string, args ...string) {
-  out, err := exec.Command(name, args...).Output()
+func ShellExec(term *term.Terminal, command string) {
+  cmd := strings.Fields(command)
+
+  out, err := exec.Command(cmd[0], cmd[1:]...).Output()
   if err != nil {
     WriteTermError(term, err)
   }
@@ -230,6 +234,20 @@ func WriteInstructions(term *term.Terminal) {
   WriteTerm(term, "'a' to mark an option\n")
   WriteTerm(term, "'q' to exit\n")
   WriteTerm(term, "Enter to continue")
+}
+
+func PrintDir(term *term.Terminal, dir string) {
+  dirEntry, err := os.ReadDir(dir)
+  if err != nil {
+    WriteTermError(term, err)
+  } 
+  var dirs []string
+  var p int
+  for p = 0; p < len(dirEntry); p++ {
+    var dir string = fs.FormatDirEntry(dirEntry[p])
+    dirs = append(dirs, dir)
+    WriteTerm(term, dir)
+  }
 }
 
 

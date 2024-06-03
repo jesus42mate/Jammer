@@ -1,10 +1,11 @@
 package main
 
 import (
-  "bufio"
-  "fmt"
-  "os"
-  "golang.org/x/term"
+	"bufio"
+	"fmt"
+	"log"
+	"os"
+	"golang.org/x/term"
 )
 
 func main() {
@@ -23,11 +24,11 @@ func main() {
 
   err = os.Chdir("/home")
   if err != nil {
-    fmt.Printf("%s", err)
+    log.Fatalf("%s", err)
   } else {
     ShellExec(terminal, "pwd")
     ChangeDir(userHomeDir)
-    ShellExec(terminal, "mkdir", "Jammer")
+    ShellExec(terminal, "mkdir Jammer")
   }
 
   terminal.Write([]byte("\nJammer: Helloo world! Im alive!\n"))
@@ -43,7 +44,6 @@ func main() {
   }
 
   choices, exit := TermChoice([]string{
-    "Update and Upgrade apt packet manager.",
     "Install Neovim from source(LTS).",
     "Install NVM (Node Version Manager).",
   }, terminal, "")
@@ -52,12 +52,19 @@ func main() {
     FormalPanic(formalPanicNeeds, exit)
   }
 
+  //if BinaryChoice(terminal, "Update packet manager?") {
+  //  AptUpdate(terminal)
+  //  AptUpgrade(terminal)
+  //}
+  //if !BinaryChoice(terminal, "Do you have git installed?") {
+  //  ShellExec(terminal, "sudo", "apt-get", "install", "git")
+  //}
+
   if choices[0] {
-    AptUpdate(terminal)
-    AptUpgrade(terminal)
-  }
-  if (choices[1]) {
-    InstallNeovim(scanner, terminal, userHomeDir)
+    err := InstallNeovim(scanner, terminal, userHomeDir)
+    if err != nil {
+      FormalPanic(formalPanicNeeds, err)
+    }
   }
 
   defer term.Restore(FD, prevState)
