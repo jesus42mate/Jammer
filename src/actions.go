@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
 	"golang.org/x/term"
 )
 
@@ -72,7 +71,7 @@ func InstallNeovim(
       file, _ = os.Open(".config")
     }
   } else {
-    WriteTerm(term, "Found .config")
+    WriteTerm(term, "# Found .config")
   }
   err = file.Chdir()
   if err != nil {
